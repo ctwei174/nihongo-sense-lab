@@ -119,14 +119,14 @@ body {
   border-color: #14b8a6 !important;
 }
 
-a.bg-white,
+a.bg-white:not(.group),
 button.bg-white {
   background-color: #0f766e !important;
   color: #ffffff !important;
   border-color: #0f766e !important;
 }
 
-a.bg-white:hover,
+a.bg-white:not(.group):hover,
 button.bg-white:hover {
   background-color: #115e59 !important;
 }
