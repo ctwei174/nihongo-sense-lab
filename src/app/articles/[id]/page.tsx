@@ -1,14 +1,62 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import AnalyzeArticleButton from "./AnalyzeArticleButton";
 import { analyzeJapaneseArticle } from "@/lib/ai/analyzeArticle";
+import { createClient } from "@/lib/supabase/server";
 
 type ArticlePageProps = {
   params: Promise<{
     id: string;
   }>;
+  searchParams?: Promise<{
+    analysis_error?: string;
+  }>;
 };
+
+type Collocation = {
+  pattern: string;
+  example: string;
+};
+
+type SimilarExpression = {
+  expression: string;
+  difference: string;
+};
+
+type Expression = {
+  id: string;
+  expression: string;
+  reading: string | null;
+  meaning_zh: string | null;
+  meaning_ja: string | null;
+  expression_type: string | null;
+  jlpt_level: string | null;
+  register: string | null;
+  nuance_note: string | null;
+  original_sentence: string | null;
+  similar_expressions: SimilarExpression[] | null;
+  collocations: Collocation[] | null;
+  is_saved: boolean | null;
+};
+
+function getAnalysisErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.includes("Missing OPENAI_API_KEY")) {
+    return "Vercel 尚未設定 OPENAI_API_KEY，請到 Environment Variables 補上後重新部署。";
+  }
+
+  if (message.includes("model_not_found") || message.includes("does not exist")) {
+    return "OPENAI_MODEL 可能不存在或此 API key 無權使用，請在 Vercel Environment Variables 改成可用模型後重新部署。";
+  }
+
+  if (message.includes("insufficient_quota")) {
+    return "OpenAI API 額度不足，請確認 billing 或換用有額度的 API key。";
+  }
+
+  return "AI 解析失敗，請稍後再試，或檢查 Vercel Function Logs。";
+}
 
 async function analyzeArticleAction(formData: FormData) {
   "use server";
@@ -42,13 +90,27 @@ async function analyzeArticleAction(formData: FormData) {
   }
 
   if (article.content.length > 6000) {
-    throw new Error("文章太長。P0 階段請先控制在 6000 字以內。");
+    redirect(
+      `/articles/${article.id}?analysis_error=${encodeURIComponent(
+        "文章太長，請先縮短到 6000 字以內再解析。",
+      )}`,
+    );
   }
 
-  const analysis = await analyzeJapaneseArticle({
-    title: article.title,
-    content: article.content,
-  });
+  let analysis;
+
+  try {
+    analysis = await analyzeJapaneseArticle({
+      title: article.title,
+      content: article.content,
+    });
+  } catch (error) {
+    redirect(
+      `/articles/${article.id}?analysis_error=${encodeURIComponent(
+        getAnalysisErrorMessage(error),
+      )}`,
+    );
+  }
 
   const { error: updateArticleError } = await supabase
     .from("articles")
@@ -62,7 +124,11 @@ async function analyzeArticleAction(formData: FormData) {
     .eq("user_id", user.id);
 
   if (updateArticleError) {
-    throw new Error(updateArticleError.message);
+    redirect(
+      `/articles/${article.id}?analysis_error=${encodeURIComponent(
+        updateArticleError.message,
+      )}`,
+    );
   }
 
   await supabase.from("article_sentences").delete().eq("article_id", article.id);
@@ -81,40 +147,44 @@ async function analyzeArticleAction(formData: FormData) {
   }));
 
   if (sentenceRows.length > 0) {
-    const { error: sentenceInsertError } = await supabase
-      .from("article_sentences")
-      .insert(sentenceRows);
+    const { error } = await supabase.from("article_sentences").insert(sentenceRows);
 
-    if (sentenceInsertError) {
-      throw new Error(sentenceInsertError.message);
+    if (error) {
+      redirect(
+        `/articles/${article.id}?analysis_error=${encodeURIComponent(
+          error.message,
+        )}`,
+      );
     }
   }
 
   const expressionRows = analysis.expressions.map((item, index) => ({
-  user_id: user.id,
-  article_id: article.id,
-  expression_index: index + 1,
-  expression: item.expression,
-  reading: item.reading,
-  meaning_zh: item.meaning_zh,
-  meaning_ja: item.meaning_ja,
-  expression_type: item.expression_type,
-  jlpt_level: item.jlpt_level,
-  register: item.register,
-  nuance_note: item.nuance_note,
-  original_sentence: item.original_sentence,
-  similar_expressions: item.similar_expressions,
-  collocations: item.collocations,
-  is_saved: false,
-}));
+    user_id: user.id,
+    article_id: article.id,
+    expression_index: index + 1,
+    expression: item.expression,
+    reading: item.reading,
+    meaning_zh: item.meaning_zh,
+    meaning_ja: item.meaning_ja,
+    expression_type: item.expression_type,
+    jlpt_level: item.jlpt_level,
+    register: item.register,
+    nuance_note: item.nuance_note,
+    original_sentence: item.original_sentence,
+    similar_expressions: item.similar_expressions,
+    collocations: item.collocations,
+    is_saved: false,
+  }));
 
   if (expressionRows.length > 0) {
-    const { error: expressionInsertError } = await supabase
-      .from("expressions")
-      .insert(expressionRows);
+    const { error } = await supabase.from("expressions").insert(expressionRows);
 
-    if (expressionInsertError) {
-      throw new Error(expressionInsertError.message);
+    if (error) {
+      redirect(
+        `/articles/${article.id}?analysis_error=${encodeURIComponent(
+          error.message,
+        )}`,
+      );
     }
   }
 
@@ -164,8 +234,13 @@ async function toggleSaveExpressionAction(formData: FormData) {
   redirect(`/articles/${articleId}`);
 }
 
-export default async function ArticleDetailPage({ params }: ArticlePageProps) {
+export default async function ArticleDetailPage({
+  params,
+  searchParams,
+}: ArticlePageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const analysisError = resolvedSearchParams?.analysis_error;
 
   const supabase = await createClient();
 
@@ -196,16 +271,16 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     .order("sentence_index", { ascending: true });
 
   const { data: expressions } = await supabase
-  .from("expressions")
-  .select("*")
-  .eq("article_id", id)
-  .eq("user_id", user.id)
-  .order("expression_index", { ascending: true })
-  .order("created_at", { ascending: true })
-  .order("id", { ascending: true });
+    .from("expressions")
+    .select("*")
+    .eq("article_id", id)
+    .eq("user_id", user.id)
+    .order("expression_index", { ascending: true })
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
 
   const sentenceList = sentences ?? [];
-  const expressionList = expressions ?? [];
+  const expressionList = (expressions ?? []) as Expression[];
   const hasAnalysis =
     Boolean(article.ai_summary_ja) ||
     sentenceList.length > 0 ||
@@ -216,10 +291,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
       <article className="mx-auto max-w-5xl">
         <header className="mb-8">
           <div className="mb-5 flex items-center justify-between gap-4">
-            <Link
-              href="/articles"
-              className="text-sm text-slate-400 hover:text-white"
-            >
+            <Link href="/articles" className="text-sm text-slate-400 hover:text-white">
               ← 回文章庫
             </Link>
 
@@ -279,17 +351,18 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         </header>
 
         <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
+          {analysisError && (
+            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+              {analysisError}
+            </div>
+          )}
+
           <div className="mb-5 flex items-center justify-between gap-4">
             <h2 className="text-lg font-semibold text-slate-200">原文</h2>
 
             <form action={analyzeArticleAction}>
               <input type="hidden" name="article_id" value={article.id} />
-              <button
-                type="submit"
-                className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
-              >
-                {hasAnalysis ? "重新 AI 解析" : "AI 解析"}
-              </button>
+              <AnalyzeArticleButton hasAnalysis={hasAnalysis} />
             </form>
           </div>
 
@@ -322,7 +395,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               <div>
                 <h2 className="text-xl font-semibold">高階表達</h2>
                 <p className="mt-2 text-sm text-slate-400">
-                  AI 抽出的 N1-N2 高階單字、搭配詞、句型與語感說明。
+                  AI 挑出的 N1-N2 表達、搭配、語感與原句。
                 </p>
               </div>
 
@@ -350,17 +423,23 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                         </span>
                       )}
 
-                      <span className="rounded-full bg-blue-950 px-3 py-1 text-sm text-blue-200">
-                        {item.jlpt_level}
-                      </span>
+                      {item.jlpt_level && (
+                        <span className="rounded-full bg-blue-950 px-3 py-1 text-sm text-blue-200">
+                          {item.jlpt_level}
+                        </span>
+                      )}
 
-                      <span className="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300">
-                        {item.expression_type}
-                      </span>
+                      {item.expression_type && (
+                        <span className="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300">
+                          {item.expression_type}
+                        </span>
+                      )}
 
-                      <span className="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300">
-                        {item.register}
-                      </span>
+                      {item.register && (
+                        <span className="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300">
+                          {item.register}
+                        </span>
+                      )}
                     </div>
 
                     <form action={toggleSaveExpressionAction}>
@@ -400,46 +479,42 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                     </div>
                   </div>
 
-                  <div className="mt-4">
-                    <p className="text-sm text-slate-500">語感說明</p>
-                    <p className="mt-1 leading-7 text-slate-300">
-                      {item.nuance_note}
-                    </p>
-                  </div>
+                  {item.nuance_note && (
+                    <div className="mt-4">
+                      <p className="text-sm text-slate-500">語感說明</p>
+                      <p className="mt-1 leading-7 text-slate-300">
+                        {item.nuance_note}
+                      </p>
+                    </div>
+                  )}
 
-                  <div className="mt-4">
-                    <p className="text-sm text-slate-500">原句</p>
-                    <p className="mt-1 leading-7 text-slate-300">
-                      {item.original_sentence}
-                    </p>
-                  </div>
+                  {item.original_sentence && (
+                    <div className="mt-4">
+                      <p className="text-sm text-slate-500">原句</p>
+                      <p className="mt-1 leading-7 text-slate-300">
+                        {item.original_sentence}
+                      </p>
+                    </div>
+                  )}
 
                   {Array.isArray(item.collocations) &&
                     item.collocations.length > 0 && (
                       <div className="mt-4">
                         <p className="text-sm text-slate-500">常見搭配</p>
                         <div className="mt-2 space-y-2">
-                          {item.collocations.map(
-                            (
-                              collocation: {
-                                pattern: string;
-                                example: string;
-                              },
-                              index: number
-                            ) => (
-                              <div
-                                key={`${item.id}-collocation-${index}`}
-                                className="rounded-xl bg-slate-900 p-3"
-                              >
-                                <p className="font-medium text-slate-200">
-                                  {collocation.pattern}
-                                </p>
-                                <p className="mt-1 text-sm leading-6 text-slate-400">
-                                  {collocation.example}
-                                </p>
-                              </div>
-                            )
-                          )}
+                          {item.collocations.map((collocation, index) => (
+                            <div
+                              key={`${item.id}-collocation-${index}`}
+                              className="rounded-xl bg-slate-900 p-3"
+                            >
+                              <p className="font-medium text-slate-200">
+                                {collocation.pattern}
+                              </p>
+                              <p className="mt-1 text-sm leading-6 text-slate-400">
+                                {collocation.example}
+                              </p>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -447,29 +522,21 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                   {Array.isArray(item.similar_expressions) &&
                     item.similar_expressions.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm text-slate-500">相似表達比較</p>
+                        <p className="text-sm text-slate-500">近義比較</p>
                         <div className="mt-2 space-y-2">
-                          {item.similar_expressions.map(
-                            (
-                              similar: {
-                                expression: string;
-                                difference: string;
-                              },
-                              index: number
-                            ) => (
-                              <div
-                                key={`${item.id}-similar-${index}`}
-                                className="rounded-xl bg-slate-900 p-3"
-                              >
-                                <p className="font-medium text-slate-200">
-                                  {similar.expression}
-                                </p>
-                                <p className="mt-1 text-sm leading-6 text-slate-400">
-                                  {similar.difference}
-                                </p>
-                              </div>
-                            )
-                          )}
+                          {item.similar_expressions.map((similar, index) => (
+                            <div
+                              key={`${item.id}-similar-${index}`}
+                              className="rounded-xl bg-slate-900 p-3"
+                            >
+                              <p className="font-medium text-slate-200">
+                                {similar.expression}
+                              </p>
+                              <p className="mt-1 text-sm leading-6 text-slate-400">
+                                {similar.difference}
+                              </p>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -481,7 +548,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
         {sentenceList.length > 0 && (
           <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">句子結構分析</h2>
+            <h2 className="text-xl font-semibold">句子解析</h2>
 
             <div className="mt-6 space-y-4">
               {sentenceList.map((sentence) => (
@@ -499,7 +566,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <div>
-                      <p className="text-sm text-slate-500">結構</p>
+                      <p className="text-sm text-slate-500">句構</p>
                       <p className="mt-1 leading-7 text-slate-300">
                         {sentence.structure_note}
                       </p>
@@ -520,10 +587,9 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
 
         {!hasAnalysis && (
           <section className="mt-6 rounded-2xl border border-dashed border-slate-700 bg-slate-900 p-6">
-            <h2 className="text-lg font-semibold">下一步：AI 解析</h2>
+            <h2 className="text-lg font-semibold">尚未進行 AI 解析</h2>
             <p className="mt-3 text-slate-400">
-              點擊上方 AI 解析按鈕，讓系統自動抽出 N1-N2
-              高階單字、搭配詞、文法與語感說明。
+              按下 AI 解析後，系統會產生摘要、句子解析與 N1-N2 高階表達。
             </p>
           </section>
         )}

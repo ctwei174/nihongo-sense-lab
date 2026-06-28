@@ -59,11 +59,11 @@ const articleAnalysisSchema = {
     },
     summary_ja: {
       type: "string",
-      description: "A short Japanese summary, within 2 sentences.",
+      description: "A Japanese summary within 2 sentences.",
     },
     summary_zh: {
       type: "string",
-      description: "A short Traditional Chinese summary, within 2 sentences.",
+      description: "A Traditional Chinese summary within 2 sentences.",
     },
     sentences: {
       type: "array",
@@ -84,11 +84,11 @@ const articleAnalysisSchema = {
           },
           structure_note: {
             type: "string",
-            description: "Keep it concise. Traditional Chinese.",
+            description: "Concise Traditional Chinese explanation.",
           },
           grammar_note: {
             type: "string",
-            description: "Keep it concise. Traditional Chinese.",
+            description: "Concise Traditional Chinese explanation.",
           },
         },
       },
@@ -148,8 +148,7 @@ const articleAnalysisSchema = {
           },
           nuance_note: {
             type: "string",
-            description:
-              "One concise Traditional Chinese explanation of nuance.",
+            description: "One concise Traditional Chinese nuance explanation.",
           },
           original_sentence: {
             type: "string",
@@ -158,7 +157,7 @@ const articleAnalysisSchema = {
             type: "array",
             maxItems: 1,
             description:
-              "At most one similar expression. Use empty array if unnecessary.",
+              "At most one similar expression. Use an empty array if unnecessary.",
             items: {
               type: "object",
               additionalProperties: false,
@@ -177,7 +176,7 @@ const articleAnalysisSchema = {
             type: "array",
             maxItems: 1,
             description:
-              "At most one useful collocation. Use empty array if unnecessary.",
+              "At most one useful collocation. Use an empty array if unnecessary.",
             items: {
               type: "object",
               additionalProperties: false,
@@ -203,6 +202,16 @@ type AnalyzeJapaneseArticleInput = {
   content: string;
 };
 
+function getModel() {
+  const configuredModel = process.env.OPENAI_MODEL?.trim();
+
+  if (!configuredModel || configuredModel === "gpt-5.4-mini") {
+    return "gpt-4.1-mini";
+  }
+
+  return configuredModel;
+}
+
 export async function analyzeJapaneseArticle({
   title,
   content,
@@ -214,33 +223,20 @@ export async function analyzeJapaneseArticle({
   }
 
   const client = new OpenAI({ apiKey });
-  const model = process.env.OPENAI_MODEL || "gpt-5.4-mini";
 
   const response = await client.responses.create({
-    model,
+    model: getModel(),
     max_output_tokens: 3000,
     input: `
-你是一位 JLPT N1-N2 高階日文教師、語感分析專家與第二語言習得教練。
+你是 JLPT N1-N2 高階日文學習教練。請分析以下文章，輸出符合 JSON schema 的結果。
 
-請分析以下日文文章，並輸出符合 JSON schema 的結果。
-
-重要限制：
-1. 不要抽 N5-N3 的基礎單字。
-2. 只抽 5 到 6 個最值得學的高階表達。
-3. 每個表達的說明要短，不要寫成長篇教科書。
-4. 句子分析只選 1 到 3 句最有學習價值的句子。
-5. similar_expressions 每個表達最多 1 個，沒有就給空陣列。
-6. collocations 每個表達最多 1 個，沒有就給空陣列。
-7. summary_ja 與 summary_zh 都控制在 2 句以內。
-8. 說明請使用繁體中文。
-
-優先抽取：
-- N1-N2 高階單字
-- 抽象名詞
-- 新聞、評論、商業、學術常用表達
-- 搭配詞 collocation
-- 可用於輸出的句型
-- 有語氣差異的表達
+分析要求：
+1. 不要挑 N5-N3 的基礎單字，優先挑 N1-N2 或接近母語者閱讀時有價值的表達。
+2. 挑出 5 到 6 個高價值表達，包含語彙、搭配、句型或抽象表現。
+3. 每個表達都要有繁體中文語感說明、原句、最多一個近義比較、最多一個常見搭配。
+4. 句子解析只選 1 到 3 句最值得學習的句子。
+5. summary_ja 和 summary_zh 都限制在 2 句以內。
+6. 說明請用繁體中文，日文欄位保持自然日文。
 
 文章標題：
 ${title}
