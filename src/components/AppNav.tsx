@@ -55,7 +55,7 @@ export default function AppNav() {
             data-neutral-button
             className="rounded-lg border border-[#d8dee9] bg-white px-4 py-2 text-sm font-medium text-[#475569] shadow-sm transition hover:border-[#bcc7d8] hover:bg-[#eef3f8] hover:text-[#24324b]"
           >
-            匯入文章
+            匯入素材
           </Link>
 
           <LogoutButton />

@@ -310,7 +310,7 @@ export default async function ArticleDetailPage({
                 href="/articles/new"
                 className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                匯入文章
+                匯入素材
               </Link>
             </div>
           </div>

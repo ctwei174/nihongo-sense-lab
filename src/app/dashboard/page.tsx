@@ -113,8 +113,8 @@ export default async function DashboardPage() {
   const actions = [
     {
       href: "/articles/new",
-      title: "匯入文章",
-      description: "貼上新聞、評論或小說片段，轉成可精讀、可保存、可輸出的學習素材。",
+      title: "匯入素材",
+      description: "貼上或上傳文章、單字表與文句筆記，轉成可精讀、可保存、可輸出的學習素材。",
     },
     {
       href: "/articles",

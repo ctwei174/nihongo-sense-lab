@@ -45,7 +45,7 @@ export default async function ArticlesPage() {
             href="/articles/new"
             className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
           >
-            匯入文章
+            匯入素材
           </Link>
         </header>
 
