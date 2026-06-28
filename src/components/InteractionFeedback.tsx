@@ -57,6 +57,11 @@ export default function InteractionFeedback() {
       }
 
       const target = event.target as HTMLElement | null;
+
+      if (target?.closest("[data-no-global-feedback]")) {
+        return;
+      }
+
       const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
 
       if (anchor) {
