@@ -13,10 +13,10 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-sky-50 px-6 text-slate-900">
-      <div className="w-full max-w-md rounded-2xl border border-sky-100 bg-white p-8 shadow-xl shadow-sky-100">
+    <main className="flex min-h-screen items-center justify-center bg-stone-50 px-6 text-slate-900">
+      <div className="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-xl shadow-stone-100">
         <div className="mb-8">
-          <p className="text-sm font-medium text-sky-700">
+          <p className="text-sm font-medium text-teal-700">
             Nihongo Sense Lab
           </p>
 
@@ -31,7 +31,7 @@ export default async function LoginPage() {
 
         <a
           href="/auth/login"
-          className="block w-full rounded-lg bg-sky-600 px-4 py-3 text-center font-semibold text-white shadow-sm transition hover:bg-sky-700"
+          className="block w-full rounded-lg bg-teal-700 px-4 py-3 text-center font-semibold text-white shadow-sm transition hover:bg-teal-800"
         >
           使用 Google 登入
         </a>
