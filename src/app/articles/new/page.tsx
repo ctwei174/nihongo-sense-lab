@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppNav from "@/components/AppNav";
+import GenerateArticleButton from "@/components/GenerateArticleButton";
 import MaterialFileInput from "@/components/MaterialFileInput";
 import UrlImportInput from "@/components/UrlImportInput";
 import { createClient } from "@/lib/supabase/server";
@@ -412,6 +413,7 @@ export default async function NewArticlePage({
               placeholder="例：少子化が社会に与える影響、N1 表現メモ、授業例文集"
               className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-slate-400"
             />
+            <GenerateArticleButton />
           </div>
 
           <div>
