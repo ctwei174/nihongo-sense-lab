@@ -2,6 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import AnalyzeArticleButton from "./AnalyzeArticleButton";
+import AppNav from "@/components/AppNav";
 import { analyzeJapaneseArticle } from "@/lib/ai/analyzeArticle";
 import { createClient } from "@/lib/supabase/server";
 
@@ -289,6 +290,8 @@ export default async function ArticleDetailPage({
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
       <article className="mx-auto max-w-5xl">
+        <AppNav />
+
         <header className="mb-8">
           <div className="mb-5 flex items-center justify-between gap-4">
             <Link href="/articles" className="text-sm text-slate-400 hover:text-white">

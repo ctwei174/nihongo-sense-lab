@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import LogoutButton from "@/components/LogoutButton";
+import AppNav from "@/components/AppNav";
 import {
   getFallbackDailyQuote,
   getTodayDate,
@@ -141,6 +141,8 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-stone-50 px-6 py-10 text-slate-900">
       <div className="mx-auto max-w-6xl">
+        <AppNav />
+
         <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-sm font-medium text-teal-700">
@@ -152,7 +154,6 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <LogoutButton />
         </header>
 
         <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">

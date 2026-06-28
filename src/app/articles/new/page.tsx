@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import AppNav from "@/components/AppNav";
 import { createClient } from "@/lib/supabase/server";
 
 async function createArticle(formData: FormData) {
@@ -59,6 +60,8 @@ export default async function NewArticlePage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
       <div className="mx-auto max-w-4xl">
+        <AppNav />
+
         <header className="mb-8">
           <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
           <h1 className="mt-2 text-3xl font-bold">新增日文文章</h1>

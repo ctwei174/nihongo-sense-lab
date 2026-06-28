@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import AppNav from "@/components/AppNav";
 import { createClient } from "@/lib/supabase/server";
 import { checkJapaneseOutput } from "@/lib/ai/checkOutput";
 
@@ -202,6 +203,8 @@ export default async function OutputPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100">
       <div className="mx-auto max-w-5xl">
+        <AppNav />
+
         <header className="mb-8 flex items-start justify-between gap-6">
           <div>
             <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
