@@ -7,7 +7,12 @@ import type { ChatMessage } from "@/lib/ai/chatAssistant";
 type ChatState = "idle" | "loading" | "error";
 
 function getPageText() {
-  return document.body.innerText
+  const clone = document.body.cloneNode(true) as HTMLElement;
+
+  clone.querySelector("[data-chat-widget]")?.remove();
+  clone.querySelectorAll("script, style").forEach((node) => node.remove());
+
+  return clone.innerText
     .replace(/\s{3,}/g, "\n")
     .replace(/\n{4,}/g, "\n\n")
     .trim()
@@ -19,12 +24,7 @@ export default function FloatingChat() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content: "我是 GPT 日文助教。可以問我這頁的單字、文法、語感差異，或請我幫你改日文句子。",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [state, setState] = useState<ChatState>("idle");
   const [error, setError] = useState("");
 
@@ -32,7 +32,7 @@ export default function FloatingChat() {
     if (open) {
       messagesEndRef.current?.scrollIntoView({ block: "end" });
     }
-  }, [messages, open]);
+  }, [messages, open, state]);
 
   const handleSend = async () => {
     const question = input.trim();
@@ -67,7 +67,7 @@ export default function FloatingChat() {
 
     if (!response.ok || data.error || !data.answer) {
       setState("error");
-      setError(data.error ?? "GPT 助教暫時沒有回應，請稍後再試。");
+      setError(data.error ?? "AI 小老師暫時沒有回應，請稍後再試。");
       return;
     }
 
@@ -84,28 +84,34 @@ export default function FloatingChat() {
       className="fixed bottom-5 right-5 z-[90] flex max-w-[calc(100vw-2rem)] flex-col items-end"
     >
       {open && (
-        <section className="mb-3 flex h-[min(620px,calc(100vh-7rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-[#d8dee9] bg-white shadow-[0_18px_60px_rgba(23,32,51,0.18)]">
+        <section className="mb-3 flex h-[min(600px,calc(100vh-7rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-[#d8dee9] bg-white shadow-[0_18px_60px_rgba(23,32,51,0.18)]">
           <header className="flex items-center justify-between border-b border-[#e6ebf2] px-4 py-3">
             <div>
-              <p className="text-sm font-semibold text-[#172033]">GPT 日文助教</p>
-              <p className="text-xs text-[#728096]">可參考目前頁面內容回答</p>
+              <p className="text-sm font-semibold text-[#172033]">AI 小老師</p>
+              <p className="text-xs text-[#728096]">N1 語感・文體・輸出</p>
             </div>
             <button
               type="button"
               data-no-global-feedback
               onClick={() => setOpen(false)}
               className="rounded-full border border-[#d8dee9] bg-white px-3 py-1 text-sm text-[#59667a] transition hover:bg-[#eef3f8]"
-              aria-label="關閉 GPT 對話框"
+              aria-label="關閉 AI 小老師"
             >
               關閉
             </button>
           </header>
 
           <div className="flex-1 space-y-3 overflow-y-auto bg-[#f8fafd] px-4 py-4">
+            {messages.length === 0 && (
+              <div className="rounded-2xl border border-[#d8dee9] bg-white px-4 py-3 text-sm leading-6 text-[#59667a]">
+                請輸入日文學習相關問題，例如語感差異、自然度、N1 改寫或文法搭配。
+              </div>
+            )}
+
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
-                className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                className={`max-w-[88%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 ${
                   message.role === "user"
                     ? "ml-auto bg-[#52648f] text-white"
                     : "mr-auto border border-[#d8dee9] bg-white text-[#172033]"
@@ -114,11 +120,13 @@ export default function FloatingChat() {
                 {message.content}
               </div>
             ))}
+
             {state === "loading" && (
               <div className="mr-auto rounded-2xl border border-[#d8dee9] bg-white px-4 py-3 text-sm text-[#728096]">
                 思考中...
               </div>
             )}
+
             {error && (
               <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
@@ -138,7 +146,7 @@ export default function FloatingChat() {
                 }
               }}
               rows={3}
-              placeholder="問單字、文法、語感，或貼上句子請我修改..."
+              placeholder="例：『目的化する』自然嗎？和『目標化する』差在哪？"
               className="w-full resize-none rounded-xl border border-[#d8dee9] bg-white px-3 py-2 text-sm leading-6 text-[#172033] outline-none transition placeholder:text-[#9aa6b8] focus:border-[#60739e]"
             />
             <div className="mt-2 flex items-center justify-between gap-3">
@@ -163,9 +171,9 @@ export default function FloatingChat() {
         onClick={() => setOpen((current) => !current)}
         className="rounded-full border border-[#d8dee9] bg-[#52648f] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(23,32,51,0.22)] transition hover:bg-[#42537c]"
         aria-expanded={open}
-        aria-label="開啟 GPT 日文助教"
+        aria-label="開啟 AI 小老師"
       >
-        GPT 助教
+        AI 小老師
       </button>
     </div>
   );
