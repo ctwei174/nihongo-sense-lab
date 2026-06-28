@@ -247,13 +247,13 @@ export default async function DashboardPage() {
               <Link
                 key={action.href}
                 href={action.href}
-                className="group rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-300 hover:bg-teal-50 hover:shadow-md"
+                className="group rounded-xl border border-stone-300 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-stone-50 hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="text-lg font-semibold text-slate-950">
                     {action.title}
                   </h2>
-                  <span className="shrink-0 rounded-full border border-teal-200 bg-white px-2 py-1 text-xs font-medium text-teal-700 transition group-hover:border-teal-300 group-hover:bg-teal-100">
+                  <span className="shrink-0 rounded-full border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-slate-600 transition group-hover:border-stone-400 group-hover:bg-stone-100">
                     前往
                   </span>
                 </div>
