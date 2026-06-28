@@ -20,16 +20,16 @@ export default function AppNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-3 z-20 mb-8 rounded-2xl border border-stone-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
+    <nav className="sticky top-3 z-20 mb-8 rounded-2xl border border-[#d8dee9] bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <Link
           href="/dashboard"
-          className="text-sm font-semibold tracking-tight text-slate-950 transition hover:text-teal-700"
+          className="text-sm font-semibold tracking-tight text-[#24324b] transition hover:text-[#52648f]"
         >
           Nihongo Sense Lab
         </Link>
 
-        <div className="flex flex-wrap items-center gap-1 rounded-full bg-stone-100 p-1">
+        <div className="flex flex-wrap items-center gap-1 rounded-full bg-[#eef3f8] p-1">
           {navItems.map((item) => {
             const active = isActive(pathname, item.match);
 
@@ -39,8 +39,8 @@ export default function AppNav() {
                 href={item.href}
                 className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
                   active
-                    ? "bg-white text-slate-950 shadow-sm"
-                    : "text-slate-500 hover:bg-white/70 hover:text-slate-900"
+                    ? "bg-white text-[#172033] shadow-sm"
+                    : "text-[#657389] hover:bg-white/70 hover:text-[#24324b]"
                 }`}
               >
                 {item.label}
@@ -52,7 +52,8 @@ export default function AppNav() {
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href="/articles/new"
-            className="rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 hover:text-slate-950"
+            data-neutral-button
+            className="rounded-lg border border-[#d8dee9] bg-white px-4 py-2 text-sm font-medium text-[#475569] shadow-sm transition hover:border-[#bcc7d8] hover:bg-[#eef3f8] hover:text-[#24324b]"
           >
             新增文章
           </Link>
