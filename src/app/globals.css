@@ -24,3 +24,135 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Temporary compatibility layer for older dark pages. New screens use these
+   colors directly; older screens inherit this bright system without a rewrite. */
+.bg-slate-950 {
+  background-color: #f8fafc !important;
+}
+
+.bg-slate-900 {
+  background-color: #ffffff !important;
+}
+
+.bg-slate-800 {
+  background-color: #e0f2fe !important;
+}
+
+.bg-blue-950 {
+  background-color: #dbeafe !important;
+}
+
+.bg-emerald-950 {
+  background-color: #dcfce7 !important;
+}
+
+.bg-amber-950 {
+  background-color: #fef3c7 !important;
+}
+
+.bg-red-950 {
+  background-color: #fee2e2 !important;
+}
+
+.text-slate-100,
+.text-slate-200,
+.text-slate-300 {
+  color: #0f172a !important;
+}
+
+.text-slate-400 {
+  color: #475569 !important;
+}
+
+.text-slate-500 {
+  color: #64748b !important;
+}
+
+.text-blue-200 {
+  color: #1d4ed8 !important;
+}
+
+.text-emerald-200 {
+  color: #047857 !important;
+}
+
+.text-amber-200 {
+  color: #b45309 !important;
+}
+
+.text-red-200 {
+  color: #b91c1c !important;
+}
+
+.border-slate-800,
+.border-slate-700 {
+  border-color: #dbeafe !important;
+}
+
+.border-blue-800,
+.border-emerald-800,
+.border-amber-800,
+.border-red-800 {
+  border-color: #bfdbfe !important;
+}
+
+.placeholder\:text-slate-600::placeholder {
+  color: #94a3b8 !important;
+}
+
+.focus\:border-slate-400:focus {
+  border-color: #0284c7 !important;
+}
+
+.hover\:bg-slate-800:hover,
+.hover\:bg-slate-700:hover,
+.hover\:bg-slate-200:hover,
+.hover\:bg-blue-900:hover,
+.hover\:bg-emerald-900:hover,
+.hover\:bg-amber-900:hover,
+.hover\:bg-red-900:hover {
+  background-color: #e0f2fe !important;
+}
+
+.hover\:border-slate-600:hover {
+  border-color: #0ea5e9 !important;
+}
+
+a.bg-white,
+button.bg-white {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #0284c7 !important;
+}
+
+a.bg-white:hover,
+button.bg-white:hover {
+  background-color: #0369a1 !important;
+}
+
+a.border-slate-700,
+button.border-slate-700 {
+  border-color: #38bdf8 !important;
+  color: #0369a1 !important;
+  background-color: #ffffff !important;
+}
+
+a.border-slate-700:hover,
+button.border-slate-700:hover {
+  background-color: #e0f2fe !important;
+}
+
+button.border-red-800,
+button.border-amber-800,
+button.border-emerald-800 {
+  border-color: #38bdf8 !important;
+  background-color: #ffffff !important;
+  color: #0369a1 !important;
+}
+
+button.border-red-800:hover,
+button.border-amber-800:hover,
+button.border-emerald-800:hover {
+  background-color: #e0f2fe !important;
+}

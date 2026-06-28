@@ -44,17 +44,28 @@ insert into public.daily_quotes (
   display_date
 ) values
 (
-  '雨ニモマケズ 風ニモマケズ',
-  '不輸給雨，也不輸給風。',
-  '宮沢 賢治',
-  '雨ニモマケズ',
+  '山路を登りながら、こう考えた。智に働けば角が立つ。情に棹させば流される。意地を通せば窮屈だ。',
+  '沿著山路往上走時，我這樣想：只憑理智行事會與人衝突；任由情感推動又會隨波逐流；堅持己見則令人窒息。',
+  '夏目 漱石',
+  '草枕',
   '青空文庫',
-  'https://www.aozora.gr.jp/cards/000081/card45630.html',
-  'N2',
-  '忍耐',
-  'Nにも負けず',
-  '「Nにも負けず」表示即使面對某種壓力或困難也不屈服。可用來寫決心、習慣或長期目標。',
-  '請用「Nにも負けず」寫一句日文，描述你學日文時想克服的一件事。',
+  'https://www.aozora.gr.jp/cards/000148/card776.html',
+  'N1',
+  '理性與情感',
+  'Vば / Nに働く / Nに棹さす',
+  '這段連續使用條件句，將三種處世態度並列，形成文學中常見的抽象論述。重點不只在「Vば」，也在「智に働く」「情に棹さす」這類抽象名詞與動詞的搭配。',
+  '請仿照「Vば...。Vば...。Vば...。」寫三句日文，分析一個兩難處境。',
   current_date
 )
-on conflict (display_date) do nothing;
+on conflict (display_date) do update set
+  quote_ja = excluded.quote_ja,
+  quote_zh = excluded.quote_zh,
+  author = excluded.author,
+  work_title = excluded.work_title,
+  source_name = excluded.source_name,
+  source_url = excluded.source_url,
+  level = excluded.level,
+  theme = excluded.theme,
+  expression_focus = excluded.expression_focus,
+  explanation_zh = excluded.explanation_zh,
+  output_prompt = excluded.output_prompt;

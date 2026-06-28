@@ -77,7 +77,7 @@ export default async function DashboardPage() {
     .eq("display_date", today)
     .maybeSingle<DailyQuoteRow>();
 
-  if (quoteData) {
+  if (quoteData?.level === "N1" || quoteData?.level === "Advanced") {
     dailyQuote = mapDailyQuote(quoteData, dailyQuote);
   }
 
