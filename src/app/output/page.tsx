@@ -156,7 +156,7 @@ export default async function OutputPage() {
 
   const expressionIds = savedExpressions.map((item) => item.id);
 
-  let latestSubmissionMap: Record<string, OutputSubmission> = {};
+  const latestSubmissionMap: Record<string, OutputSubmission> = {};
 
   if (expressionIds.length > 0) {
     const { data: submissions, error: submissionError } = await supabase

@@ -27,18 +27,23 @@ const outputCheckSchema = {
     },
     grammar_feedback: {
       type: "string",
+      description: "Concise Traditional Chinese feedback.",
     },
     nuance_feedback: {
       type: "string",
+      description: "Concise Traditional Chinese feedback.",
     },
     collocation_feedback: {
       type: "string",
+      description: "Concise Traditional Chinese feedback.",
     },
     suggested_revision: {
       type: "string",
+      description: "One natural Japanese revision.",
     },
     overall_feedback: {
       type: "string",
+      description: "Concise Traditional Chinese overall comment.",
     },
   },
 } as const;
@@ -66,30 +71,30 @@ export async function checkJapaneseOutput({
     throw new Error("Missing OPENAI_API_KEY.");
   }
 
-  const client = new OpenAI({
-    apiKey,
-  });
-
-  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+  const client = new OpenAI({ apiKey });
+  const model = process.env.OPENAI_MODEL || "gpt-5.4-mini";
 
   const response = await client.responses.create({
     model,
+    max_output_tokens: 1000,
     input: `
 你是一位高階日文寫作教練，專門協助 JLPT N1-N2 學習者把「看得懂的表達」轉換成「能自然使用的日文輸出」。
 
 請批改學習者使用指定日文表達所寫的句子。
 
-請從以下角度評估：
+請簡潔評估：
 1. 文法是否正確
 2. 指定表達是否用對
 3. 搭配詞是否自然
-4. 語氣是否符合正式/自然日文
+4. 語氣是否自然
 5. 是否有中文直譯感
 6. 如何改成更自然的日文
 
-請用繁體中文回饋。
-請不要只說「正確」或「錯誤」，要具體說明原因。
-如果句子已經自然，也請給出更高階或更正式的改寫版本。
+限制：
+- 請用繁體中文回饋。
+- 每個 feedback 欄位請控制在 1 到 2 句。
+- suggested_revision 只給 1 句自然日文改寫。
+- 不要長篇解釋。
 
 指定表達：
 ${expression}
@@ -112,7 +117,7 @@ ${submissionText}
     text: {
       format: {
         type: "json_schema",
-        name: "output_check",
+        name: "output_check_fast",
         strict: true,
         schema: outputCheckSchema,
       },
