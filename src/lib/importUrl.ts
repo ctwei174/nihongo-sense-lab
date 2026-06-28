@@ -5,6 +5,7 @@ const pdfFileExtensions = [".pdf"];
 const powerPointFileExtensions = [".pptx"];
 const maxFetchedUrlBytes = 4 * 1024 * 1024;
 const fetchTimeoutMs = 10000;
+const minArticleBodyLength = 280;
 
 type FetchedMaterial = {
   title: string;
@@ -50,6 +51,17 @@ function normalizeExtractedText(text: string) {
     .replace(/[ \u3000]{2,}/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+function decodeBuffer(buffer: Buffer, contentType: string) {
+  const charset =
+    contentType.match(/charset=([^;\s]+)/i)?.[1]?.trim().toLowerCase() ?? "utf-8";
+
+  try {
+    return new TextDecoder(charset).decode(buffer);
+  } catch {
+    return buffer.toString("utf8");
+  }
 }
 
 function decodeHtmlText(text: string) {
@@ -184,18 +196,23 @@ function extractJsonLdArticle(html: string) {
         });
 
       if (article) {
-        const content = [
-          article.articleBody,
-          article.description,
-          article.abstract,
-        ]
-          .filter(Boolean)
-          .join("\n\n");
+        const articleBody = normalizeExtractedText(article.articleBody ?? "");
+        const fallbackContent = normalizeExtractedText(
+          [article.description, article.abstract].filter(Boolean).join("\n\n"),
+        );
+        const content = articleBody || fallbackContent;
 
-        if (content) {
+        if (articleBody.length >= minArticleBodyLength) {
           return {
             title: normalizeExtractedText(article.headline ?? article.name ?? ""),
-            content: normalizeExtractedText(content),
+            content: articleBody,
+          };
+        }
+
+        if (content.length >= minArticleBodyLength) {
+          return {
+            title: normalizeExtractedText(article.headline ?? article.name ?? ""),
+            content,
           };
         }
       }
@@ -210,7 +227,7 @@ function extractJsonLdArticle(html: string) {
 function extractReadableHtml(html: string): FetchedMaterial {
   const jsonLd = extractJsonLdArticle(html);
 
-  if (jsonLd?.content) {
+  if (jsonLd?.content && jsonLd.content.length >= minArticleBodyLength) {
     return jsonLd;
   }
 
@@ -226,7 +243,7 @@ function extractReadableHtml(html: string): FetchedMaterial {
   const content = candidates[0] || metaDescription;
 
   return {
-    title: extractHtmlTitle(html),
+    title: jsonLd?.title || extractHtmlTitle(html),
     content: normalizeExtractedText(content).slice(0, 20000),
   };
 }
@@ -371,7 +388,7 @@ export async function fetchUrlMaterial(sourceUrl: string): Promise<FetchedMateri
   const extension = getFileExtension(parsedUrl.pathname);
 
   if (contentType.includes("text/html") || extension === ".html") {
-    const result = extractReadableHtml(buffer.toString("utf8"));
+    const result = extractReadableHtml(decodeBuffer(buffer, contentType));
 
     if (!result.content || result.content.length < 40) {
       throw new Error("已讀取網頁，但沒有找到足夠的正文內容。請改用貼上文字。");

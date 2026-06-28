@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import AnalyzeArticleButton from "./AnalyzeArticleButton";
 import AppNav from "@/components/AppNav";
+import DeleteArticleButton from "@/components/DeleteArticleButton";
 import { analyzeJapaneseArticle } from "@/lib/ai/analyzeArticle";
 import { createClient } from "@/lib/supabase/server";
 
@@ -235,6 +236,93 @@ async function toggleSaveExpressionAction(formData: FormData) {
   redirect(`/articles/${articleId}`);
 }
 
+async function deleteCurrentArticleAction(formData: FormData) {
+  "use server";
+
+  const articleId = String(formData.get("article_id") ?? "").trim();
+
+  if (!articleId) {
+    throw new Error("Missing article_id.");
+  }
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/login");
+  }
+
+  const { data: expressions, error: expressionError } = await supabase
+    .from("expressions")
+    .select("id")
+    .eq("article_id", articleId)
+    .eq("user_id", user.id);
+
+  if (expressionError) {
+    throw new Error(expressionError.message);
+  }
+
+  const expressionIds = (expressions ?? []).map((item) => item.id);
+
+  if (expressionIds.length > 0) {
+    await supabase
+      .from("output_submissions")
+      .delete()
+      .eq("user_id", user.id)
+      .in("expression_id", expressionIds);
+
+    const { data: cards } = await supabase
+      .from("review_cards")
+      .select("id")
+      .eq("user_id", user.id)
+      .in("expression_id", expressionIds);
+
+    const cardIds = (cards ?? []).map((card) => card.id);
+
+    if (cardIds.length > 0) {
+      await supabase
+        .from("review_logs")
+        .delete()
+        .eq("user_id", user.id)
+        .in("card_id", cardIds);
+    }
+
+    await supabase
+      .from("review_cards")
+      .delete()
+      .eq("user_id", user.id)
+      .in("expression_id", expressionIds);
+  }
+
+  await supabase.from("article_sentences").delete().eq("article_id", articleId);
+  await supabase
+    .from("expressions")
+    .delete()
+    .eq("article_id", articleId)
+    .eq("user_id", user.id);
+
+  const { error } = await supabase
+    .from("articles")
+    .delete()
+    .eq("id", articleId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/articles");
+  revalidatePath("/dashboard");
+  revalidatePath("/vocab");
+  revalidatePath("/review");
+  revalidatePath("/output");
+  redirect("/articles");
+}
+
 export default async function ArticleDetailPage({
   params,
   searchParams,
@@ -312,6 +400,11 @@ export default async function ArticleDetailPage({
               >
                 匯入素材
               </Link>
+
+              <form action={deleteCurrentArticleAction}>
+                <input type="hidden" name="article_id" value={article.id} />
+                <DeleteArticleButton />
+              </form>
             </div>
           </div>
 
