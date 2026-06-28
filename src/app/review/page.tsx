@@ -342,9 +342,9 @@ export default async function ReviewPage() {
         <header className="mb-8 flex items-start justify-between gap-6">
           <div>
             <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
-            <h1 className="mt-2 text-3xl font-bold">每日複習</h1>
+            <h1 className="mt-2 text-3xl font-bold">間隔複習</h1>
             <p className="mt-3 text-slate-400">
-              將收藏的高階表達轉成辨識、回想、搭配與造句卡，逐步進入長期記憶。
+              用辨識、回想、搭配與造句卡，把文章中學到的表達推進長期記憶。
             </p>
           </div>
 
@@ -353,37 +353,37 @@ export default async function ReviewPage() {
               type="submit"
               className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
             >
-              同步收藏表達
+              建立複習卡
             </button>
           </form>
         </header>
 
         <section className="mb-8 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">已收藏表達</p>
+            <p className="text-sm text-slate-400">語彙筆記</p>
             <p className="mt-2 text-3xl font-bold">
               {savedExpressionCount ?? 0}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">複習卡總數</p>
+            <p className="text-sm text-slate-400">全部複習卡</p>
             <p className="mt-2 text-3xl font-bold">
               {totalReviewCardCount ?? 0}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">今日到期</p>
+            <p className="text-sm text-slate-400">今日待複習</p>
             <p className="mt-2 text-3xl font-bold">{dueCards.length}</p>
           </div>
         </section>
 
         {dueCards.length === 0 ? (
           <section className="rounded-2xl border border-slate-800 bg-slate-900 p-8">
-            <h2 className="text-xl font-semibold">目前沒有到期複習卡</h2>
+            <h2 className="text-xl font-semibold">今天沒有待複習卡</h2>
             <p className="mt-3 text-slate-400">
-              如果你剛收藏表達，請先點「同步收藏表達」，系統會自動建立複習卡。
+              如果你剛加入語彙筆記，請先點「建立複習卡」，系統會補齊辨識、回想、搭配與造句卡。
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -391,14 +391,14 @@ export default async function ReviewPage() {
                 href="/vocab"
                 className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                前往收藏表達庫
+                前往語彙筆記庫
               </Link>
 
               <Link
                 href="/articles"
                 className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                前往文章庫
+                前往精讀文章庫
               </Link>
             </div>
           </section>
@@ -451,7 +451,7 @@ export default async function ReviewPage() {
                   )}
 
                   <div className="rounded-xl bg-slate-950 p-5">
-                    <p className="text-sm text-slate-500">問題</p>
+                    <p className="text-sm text-slate-500">回想題</p>
                     <p className="mt-2 text-lg leading-8 text-slate-200">
                       {card.prompt}
                     </p>
@@ -460,7 +460,7 @@ export default async function ReviewPage() {
                   {card.answer && (
                     <details className="mt-4 rounded-xl border border-slate-800 bg-slate-950 p-5">
                       <summary className="cursor-pointer text-sm font-medium text-slate-300">
-                        顯示答案 / 參考
+                        展開答案與用法
                       </summary>
                       <p className="mt-4 leading-7 text-slate-300">
                         {card.answer}
@@ -468,7 +468,7 @@ export default async function ReviewPage() {
 
                       {expression?.original_sentence && (
                         <p className="mt-4 border-t border-slate-800 pt-4 text-sm leading-7 text-slate-400">
-                          原句：{expression.original_sentence}
+                          原文脈絡：{expression.original_sentence}
                         </p>
                       )}
                     </details>
@@ -485,7 +485,7 @@ export default async function ReviewPage() {
                       value="again"
                       className="rounded-xl border border-red-800 bg-red-950 px-4 py-2 text-sm text-red-200 transition hover:bg-red-900"
                     >
-                      Again
+                      Again 重來
                     </button>
 
                     <button
@@ -493,7 +493,7 @@ export default async function ReviewPage() {
                       value="hard"
                       className="rounded-xl border border-amber-800 bg-amber-950 px-4 py-2 text-sm text-amber-200 transition hover:bg-amber-900"
                     >
-                      Hard
+                      Hard 勉強
                     </button>
 
                     <button
@@ -501,7 +501,7 @@ export default async function ReviewPage() {
                       value="good"
                       className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
                     >
-                      Good
+                      Good 記得
                     </button>
 
                     <button
@@ -509,7 +509,7 @@ export default async function ReviewPage() {
                       value="easy"
                       className="rounded-xl border border-emerald-800 bg-emerald-950 px-4 py-2 text-sm text-emerald-200 transition hover:bg-emerald-900"
                     >
-                      Easy
+                      Easy 熟悉
                     </button>
                   </form>
                 </div>
@@ -523,14 +523,14 @@ export default async function ReviewPage() {
             href="/dashboard"
             className="text-sm text-slate-400 hover:text-white"
           >
-            ← 回 Dashboard
+            ← 回概覽
           </Link>
 
           <Link
             href="/vocab"
             className="text-sm text-slate-400 hover:text-white"
           >
-            回收藏表達庫
+            回語彙筆記庫
           </Link>
         </div>
       </div>

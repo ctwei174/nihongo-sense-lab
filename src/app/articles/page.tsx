@@ -35,9 +35,9 @@ export default async function ArticlesPage() {
         <header className="mb-8 flex items-start justify-between gap-6">
           <div>
             <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
-            <h1 className="mt-2 text-3xl font-bold">文章庫</h1>
+            <h1 className="mt-2 text-3xl font-bold">精讀文章庫</h1>
             <p className="mt-3 text-slate-400">
-              這裡會顯示你儲存過的日文文章。下一階段會加入 AI 解析。
+              保存新聞、評論、社論或小說片段，進入文章頁後可進行 N1 級 AI 精讀解析。
             </p>
           </div>
 
@@ -45,14 +45,14 @@ export default async function ArticlesPage() {
             href="/articles/new"
             className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
           >
-            新增文章
+            匯入文章
           </Link>
         </header>
 
         <section className="space-y-4">
           {articleList.length === 0 ? (
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 text-slate-400">
-              目前還沒有文章。請先新增一篇日文文章。
+              目前還沒有文章。先匯入一篇日文素材，建立你的第一份精讀筆記。
             </div>
           ) : (
             articleList.map((article) => (
@@ -94,7 +94,7 @@ export default async function ArticlesPage() {
             href="/dashboard"
             className="text-sm text-slate-400 hover:text-white"
           >
-            ← 回 Dashboard
+            ← 回概覽
           </Link>
         </div>
       </div>

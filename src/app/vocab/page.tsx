@@ -108,9 +108,9 @@ export default async function VocabPage() {
         <header className="mb-8 flex items-start justify-between gap-6">
           <div>
             <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
-            <h1 className="mt-2 text-3xl font-bold">收藏表達庫</h1>
+            <h1 className="mt-2 text-3xl font-bold">語彙筆記庫</h1>
             <p className="mt-3 text-slate-400">
-              這裡會顯示你從文章中收藏的高階單字、搭配詞、句型與語感筆記。
+              集中整理從文章中收藏的高階表達，保留語感、語域、搭配與原文脈絡。
             </p>
           </div>
 
@@ -118,22 +118,22 @@ export default async function VocabPage() {
             href="/articles"
             className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
           >
-            回文章庫
+            回精讀文章庫
           </Link>
         </header>
 
         {savedExpressions.length === 0 ? (
           <section className="rounded-2xl border border-slate-800 bg-slate-900 p-8">
-            <h2 className="text-xl font-semibold">目前還沒有收藏表達</h2>
+            <h2 className="text-xl font-semibold">目前還沒有語彙筆記</h2>
             <p className="mt-3 text-slate-400">
-              請先到文章詳情頁，在 AI 解析出的高階表達中點擊「收藏」。
+              先完成一篇文章的 AI 精讀，再把值得反覆使用的 N1 表達加入筆記。
             </p>
 
             <Link
               href="/articles"
               className="mt-6 inline-block rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
             >
-              前往文章庫
+              前往精讀文章庫
             </Link>
           </section>
         ) : (
@@ -184,27 +184,27 @@ export default async function VocabPage() {
                         href={`/articles/${item.article_id}`}
                         className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
                       >
-                        回原文
+                        回到原文
                       </Link>
                     )}
                   </div>
 
                   {articleTitle && (
                     <p className="mt-3 text-sm text-slate-500">
-                      來源文章：{articleTitle}
+                      來源素材：{articleTitle}
                     </p>
                   )}
 
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
                     <div>
-                      <p className="text-sm text-slate-500">中文意思</p>
+                      <p className="text-sm text-slate-500">中文理解</p>
                       <p className="mt-1 text-slate-200">
                         {item.meaning_zh ?? "—"}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-sm text-slate-500">日文解釋</p>
+                      <p className="text-sm text-slate-500">日文語義</p>
                       <p className="mt-1 text-slate-200">
                         {item.meaning_ja ?? "—"}
                       </p>
@@ -213,7 +213,7 @@ export default async function VocabPage() {
 
                   {item.nuance_note && (
                     <div className="mt-5">
-                      <p className="text-sm text-slate-500">語感說明</p>
+                      <p className="text-sm text-slate-500">語感與使用限制</p>
                       <p className="mt-1 leading-7 text-slate-300">
                         {item.nuance_note}
                       </p>
@@ -222,7 +222,7 @@ export default async function VocabPage() {
 
                   {item.original_sentence && (
                     <div className="mt-5">
-                      <p className="text-sm text-slate-500">原句</p>
+                      <p className="text-sm text-slate-500">原文脈絡</p>
                       <p className="mt-1 leading-7 text-slate-300">
                         {item.original_sentence}
                       </p>
@@ -232,7 +232,7 @@ export default async function VocabPage() {
                   {Array.isArray(item.collocations) &&
                     item.collocations.length > 0 && (
                       <div className="mt-5">
-                        <p className="text-sm text-slate-500">常見搭配</p>
+                        <p className="text-sm text-slate-500">搭配模式</p>
                         <div className="mt-2 grid gap-2">
                           {item.collocations.map((collocation, index) => (
                             <div
@@ -254,7 +254,7 @@ export default async function VocabPage() {
                   {Array.isArray(item.similar_expressions) &&
                     item.similar_expressions.length > 0 && (
                       <div className="mt-5">
-                        <p className="text-sm text-slate-500">相似表達比較</p>
+                        <p className="text-sm text-slate-500">近義語比較</p>
                         <div className="mt-2 grid gap-2">
                           {item.similar_expressions.map((similar, index) => (
                             <div
@@ -283,14 +283,14 @@ export default async function VocabPage() {
             href="/dashboard"
             className="text-sm text-slate-400 hover:text-white"
           >
-            ← 回 Dashboard
+            ← 回概覽
           </Link>
 
           <Link
             href="/articles"
             className="text-sm text-slate-400 hover:text-white"
           >
-            回文章庫
+            回精讀文章庫
           </Link>
         </div>
       </div>

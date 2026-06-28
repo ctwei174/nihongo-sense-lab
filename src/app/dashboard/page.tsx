@@ -104,37 +104,37 @@ export default async function DashboardPage() {
     .eq("user_id", user.id);
 
   const stats = [
-    { label: "文章", value: articleCount ?? 0 },
-    { label: "保存語彙", value: savedExpressionCount ?? 0 },
-    { label: "今日複習", value: dueReviewCount ?? 0 },
-    { label: "輸出紀錄", value: outputCount ?? 0 },
+    { label: "精讀文章", value: articleCount ?? 0 },
+    { label: "收藏表達", value: savedExpressionCount ?? 0 },
+    { label: "待複習", value: dueReviewCount ?? 0 },
+    { label: "批改紀錄", value: outputCount ?? 0 },
   ];
 
   const actions = [
     {
       href: "/articles/new",
-      title: "新增文章",
-      description: "貼上日文文章，讓 AI 產生摘要、句構說明與可保存的高階語彙。",
+      title: "匯入文章",
+      description: "貼上新聞、評論或小說片段，轉成可精讀、可保存、可輸出的學習素材。",
     },
     {
       href: "/articles",
-      title: "文章庫",
-      description: "回到已分析的文章，複習句子、語法與上下文中的自然搭配。",
+      title: "精讀文章庫",
+      description: "回到已解析的文章，重看主旨、句構、文法與上下文中的自然搭配。",
     },
     {
       href: "/vocab",
-      title: "語彙庫",
-      description: "集中管理保存的表現，確認讀音、語感、近義詞與常見搭配。",
+      title: "語彙筆記庫",
+      description: "整理收藏的 N1 表達，確認讀音、語域、語感、近義比較與搭配模式。",
     },
     {
       href: "/review",
       title: "間隔複習",
-      description: "用 Again、Hard、Good、Easy 更新熟悉度，把語彙變成長期記憶。",
+      description: "用辨識、回想、搭配與造句卡，把被動理解逐步變成長期記憶。",
     },
     {
       href: "/output",
-      title: "輸出練習",
-      description: "用保存語彙造句，取得 AI 對語法、語感與搭配的回饋。",
+      title: "輸出批改",
+      description: "用收藏表達造句，取得 AI 對文法、搭配、語氣與自然度的回饋。",
     },
   ];
 
@@ -148,9 +148,9 @@ export default async function DashboardPage() {
             <p className="text-sm font-medium text-[#52648f]">
               Nihongo Sense Lab
             </p>
-            <h1 className="mt-2 text-3xl font-bold">Dashboard</h1>
+            <h1 className="mt-2 text-3xl font-bold">今日學習工作台</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[#59667a]">
-              今天先用一則 N1 日文佳句暖身，再進入文章精讀、語彙保存、間隔複習與輸出練習。
+              先讀一則 N1 級佳句暖身，再進入精讀、語彙保存、間隔複習與輸出批改。
             </p>
           </div>
 
@@ -202,7 +202,7 @@ export default async function DashboardPage() {
               </p>
               <div className="mt-5 rounded-lg border border-[#d8dee9] bg-[#f8fafd] p-4">
                 <p className="text-xs font-medium text-[#52648f]">
-                  今日輸出練習
+                  今日輸出任務
                 </p>
                 <p className="mt-2 text-sm leading-6 text-[#475569]">
                   {dailyQuote.outputPrompt}
@@ -214,13 +214,13 @@ export default async function DashboardPage() {
 
         <section className="mt-6">
           <h2 className="mb-3 text-sm font-semibold text-[#24324b]">
-            目前狀態
+            學習概況
           </h2>
 
           <div className="rounded-xl border border-[#d8dee9] bg-white shadow-sm">
             <div className="grid gap-px bg-[#d8dee9] sm:grid-cols-2 lg:grid-cols-5">
               <div className="bg-white px-4 py-3 sm:col-span-2 lg:col-span-1">
-                <p className="text-xs text-slate-500">登入帳號</p>
+                <p className="text-xs text-slate-500">目前帳號</p>
                 <p className="mt-1 truncate text-sm font-semibold text-[#172033]">
                   {user.email}
                 </p>
@@ -240,7 +240,7 @@ export default async function DashboardPage() {
 
         <section className="mt-6">
           <h2 className="mb-3 text-sm font-semibold text-[#24324b]">
-            功能入口
+            學習流程
           </h2>
 
           <div className="grid gap-4 md:grid-cols-5">

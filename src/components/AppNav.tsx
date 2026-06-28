@@ -6,10 +6,10 @@ import LogoutButton from "@/components/LogoutButton";
 
 const navItems = [
   { href: "/dashboard", label: "概覽", match: ["/dashboard"] },
-  { href: "/articles", label: "文章", match: ["/articles"] },
+  { href: "/articles", label: "精讀", match: ["/articles"] },
   { href: "/vocab", label: "語彙", match: ["/vocab"] },
   { href: "/review", label: "複習", match: ["/review"] },
-  { href: "/output", label: "輸出", match: ["/output"] },
+  { href: "/output", label: "批改", match: ["/output"] },
 ];
 
 function isActive(pathname: string, matchers: string[]) {
@@ -55,7 +55,7 @@ export default function AppNav() {
             data-neutral-button
             className="rounded-lg border border-[#d8dee9] bg-white px-4 py-2 text-sm font-medium text-[#475569] shadow-sm transition hover:border-[#bcc7d8] hover:bg-[#eef3f8] hover:text-[#24324b]"
           >
-            新增文章
+            匯入文章
           </Link>
 
           <LogoutButton />

@@ -56,7 +56,7 @@ function getAnalysisErrorMessage(error: unknown) {
     return "OpenAI API 額度不足，請確認 billing 或換用有額度的 API key。";
   }
 
-  return "AI 解析失敗，請稍後再試，或檢查 Vercel Function Logs。";
+  return "AI 精讀解析失敗，請稍後再試，或檢查 Vercel Function Logs。";
 }
 
 async function analyzeArticleAction(formData: FormData) {
@@ -303,19 +303,19 @@ export default async function ArticleDetailPage({
                 href="/vocab"
                 className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                收藏表達庫
+                語彙筆記庫
               </Link>
 
               <Link
                 href="/articles/new"
                 className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                新增文章
+                匯入文章
               </Link>
             </div>
           </div>
 
-          <p className="text-sm text-slate-400">Article</p>
+          <p className="text-sm text-slate-400">精讀素材</p>
           <h1 className="mt-2 text-3xl font-bold leading-tight">
             {article.title}
           </h1>
@@ -377,14 +377,14 @@ export default async function ArticleDetailPage({
         {article.ai_summary_ja && (
           <section className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-lg font-semibold">日文摘要</h2>
+              <h2 className="text-lg font-semibold">日文要約</h2>
               <p className="mt-3 leading-7 text-slate-300">
                 {article.ai_summary_ja}
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="text-lg font-semibold">中文摘要</h2>
+              <h2 className="text-lg font-semibold">中文理解摘要</h2>
               <p className="mt-3 leading-7 text-slate-300">
                 {article.ai_summary_zh}
               </p>
@@ -396,9 +396,9 @@ export default async function ArticleDetailPage({
           <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold">高階表達</h2>
+                <h2 className="text-xl font-semibold">N1 高階表達</h2>
                 <p className="mt-2 text-sm text-slate-400">
-                  AI 挑出的 N1-N2 表達、搭配、語感與原句。
+                  從文章脈絡中挑出的表達、搭配、語域與語感差異，可收藏後複習與輸出。
                 </p>
               </div>
 
@@ -406,7 +406,7 @@ export default async function ArticleDetailPage({
                 href="/vocab"
                 className="whitespace-nowrap rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                查看收藏
+                查看語彙筆記
               </Link>
             </div>
 
@@ -465,26 +465,26 @@ export default async function ArticleDetailPage({
                             : "rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
                         }
                       >
-                        {item.is_saved ? "已收藏，點擊取消" : "收藏"}
+                        {item.is_saved ? "已加入筆記" : "加入筆記"}
                       </button>
                     </form>
                   </div>
 
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <div>
-                      <p className="text-sm text-slate-500">中文意思</p>
+                      <p className="text-sm text-slate-500">中文理解</p>
                       <p className="mt-1 text-slate-200">{item.meaning_zh}</p>
                     </div>
 
                     <div>
-                      <p className="text-sm text-slate-500">日文解釋</p>
+                      <p className="text-sm text-slate-500">日文語義</p>
                       <p className="mt-1 text-slate-200">{item.meaning_ja}</p>
                     </div>
                   </div>
 
                   {item.nuance_note && (
                     <div className="mt-4">
-                      <p className="text-sm text-slate-500">語感說明</p>
+                      <p className="text-sm text-slate-500">語感與使用限制</p>
                       <p className="mt-1 leading-7 text-slate-300">
                         {item.nuance_note}
                       </p>
@@ -493,7 +493,7 @@ export default async function ArticleDetailPage({
 
                   {item.original_sentence && (
                     <div className="mt-4">
-                      <p className="text-sm text-slate-500">原句</p>
+                      <p className="text-sm text-slate-500">原文脈絡</p>
                       <p className="mt-1 leading-7 text-slate-300">
                         {item.original_sentence}
                       </p>
@@ -503,7 +503,7 @@ export default async function ArticleDetailPage({
                   {Array.isArray(item.collocations) &&
                     item.collocations.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm text-slate-500">常見搭配</p>
+                        <p className="text-sm text-slate-500">搭配模式</p>
                         <div className="mt-2 space-y-2">
                           {item.collocations.map((collocation, index) => (
                             <div
@@ -525,7 +525,7 @@ export default async function ArticleDetailPage({
                   {Array.isArray(item.similar_expressions) &&
                     item.similar_expressions.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm text-slate-500">近義比較</p>
+                        <p className="text-sm text-slate-500">近義語比較</p>
                         <div className="mt-2 space-y-2">
                           {item.similar_expressions.map((similar, index) => (
                             <div
@@ -551,7 +551,7 @@ export default async function ArticleDetailPage({
 
         {sentenceList.length > 0 && (
           <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <h2 className="text-xl font-semibold">句子解析</h2>
+            <h2 className="text-xl font-semibold">句構與文法解析</h2>
 
             <div className="mt-6 space-y-4">
               {sentenceList.map((sentence) => (
@@ -560,7 +560,7 @@ export default async function ArticleDetailPage({
                   className="rounded-2xl border border-slate-800 bg-slate-950 p-5"
                 >
                   <p className="text-sm text-slate-500">
-                    Sentence {sentence.sentence_index}
+                    第 {sentence.sentence_index} 句
                   </p>
 
                   <p className="mt-2 leading-8 text-slate-200">
@@ -590,9 +590,9 @@ export default async function ArticleDetailPage({
 
         {!hasAnalysis && (
           <section className="mt-6 rounded-2xl border border-dashed border-slate-700 bg-slate-900 p-6">
-            <h2 className="text-lg font-semibold">尚未進行 AI 解析</h2>
+            <h2 className="text-lg font-semibold">尚未建立精讀解析</h2>
             <p className="mt-3 text-slate-400">
-              按下 AI 解析後，系統會產生摘要、句子解析與 N1-N2 高階表達。
+              按下「開始 AI 精讀」後，系統會產生日文要約、中文理解摘要、句構解析與可收藏的 N1 表達。
             </p>
           </section>
         )}

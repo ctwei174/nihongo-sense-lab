@@ -208,9 +208,9 @@ export default async function OutputPage() {
         <header className="mb-8 flex items-start justify-between gap-6">
           <div>
             <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
-            <h1 className="mt-2 text-3xl font-bold">造句輸出訓練</h1>
+            <h1 className="mt-2 text-3xl font-bold">輸出批改</h1>
             <p className="mt-3 text-slate-400">
-              選擇已收藏的高階表達，寫出自己的日文句子，讓 AI 檢查自然度、文法、搭配與語氣。
+              選擇語彙筆記中的高階表達，寫出自己的日文句子，讓 AI 檢查文法、搭配、語氣與自然度。
             </p>
           </div>
 
@@ -218,34 +218,34 @@ export default async function OutputPage() {
             href="/vocab"
             className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
           >
-            回收藏表達庫
+            回語彙筆記庫
           </Link>
         </header>
 
         <section className="mb-8 grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">已收藏表達</p>
+            <p className="text-sm text-slate-400">可練習表達</p>
             <p className="mt-2 text-3xl font-bold">
               {savedExpressions.length}
             </p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">造句提交總數</p>
+            <p className="text-sm text-slate-400">累積批改</p>
             <p className="mt-2 text-3xl font-bold">{outputCount ?? 0}</p>
           </div>
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">訓練重點</p>
+            <p className="text-sm text-slate-400">訓練目標</p>
             <p className="mt-2 text-lg font-medium">被動理解 → 主動使用</p>
           </div>
         </section>
 
         {savedExpressions.length === 0 ? (
           <section className="rounded-2xl border border-slate-800 bg-slate-900 p-8">
-            <h2 className="text-xl font-semibold">目前還沒有可練習的表達</h2>
+            <h2 className="text-xl font-semibold">目前還沒有可輸出的表達</h2>
             <p className="mt-3 text-slate-400">
-              請先到文章詳情頁收藏高階表達，再回來做造句訓練。
+              先在文章精讀頁把想主動使用的 N1 表達加入語彙筆記，再回來造句。
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -253,14 +253,14 @@ export default async function OutputPage() {
                 href="/articles"
                 className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                前往文章庫
+                前往精讀文章庫
               </Link>
 
               <Link
                 href="/vocab"
                 className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
               >
-                前往收藏表達庫
+                前往語彙筆記庫
               </Link>
             </div>
           </section>
@@ -316,14 +316,14 @@ export default async function OutputPage() {
                         href={`/articles/${item.article_id}`}
                         className="rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
                       >
-                        回原文
+                        回到原文
                       </Link>
                     )}
                   </div>
 
                   {item.nuance_note && (
                     <div className="mt-5 rounded-xl bg-slate-950 p-4">
-                      <p className="text-sm text-slate-500">語感提醒</p>
+                      <p className="text-sm text-slate-500">語感與使用限制</p>
                       <p className="mt-2 leading-7 text-slate-300">
                         {item.nuance_note}
                       </p>
@@ -332,7 +332,7 @@ export default async function OutputPage() {
 
                   {item.original_sentence && (
                     <div className="mt-4 rounded-xl bg-slate-950 p-4">
-                      <p className="text-sm text-slate-500">原句參考</p>
+                      <p className="text-sm text-slate-500">原文脈絡</p>
                       <p className="mt-2 leading-7 text-slate-300">
                         {item.original_sentence}
                       </p>
@@ -344,7 +344,7 @@ export default async function OutputPage() {
 
                     <div>
                       <label className="mb-2 block text-sm font-medium text-slate-300">
-                        使用「{item.expression}」造一句日文
+                        使用「{item.expression}」寫一個自然句
                       </label>
 
                       <textarea
@@ -360,14 +360,14 @@ export default async function OutputPage() {
                       type="submit"
                       className="rounded-xl bg-white px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
                     >
-                      AI 批改造句
+                      送出 AI 批改
                     </button>
                   </form>
 
                   {latestSubmission && (
                     <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-950 p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <h3 className="text-lg font-semibold">最近一次批改</h3>
+                        <h3 className="text-lg font-semibold">最近一次回饋</h3>
 
                         {typeof latestSubmission.ai_score === "number" && (
                           <span className="rounded-full bg-emerald-950 px-3 py-1 text-sm text-emerald-200">
@@ -377,7 +377,7 @@ export default async function OutputPage() {
                       </div>
 
                       <div className="mt-4">
-                        <p className="text-sm text-slate-500">你的句子</p>
+                        <p className="text-sm text-slate-500">你的輸出</p>
                         <p className="mt-1 leading-7 text-slate-300">
                           {latestSubmission.submission_text}
                         </p>
@@ -385,7 +385,7 @@ export default async function OutputPage() {
 
                       {latestSubmission.suggested_revision && (
                         <div className="mt-4">
-                          <p className="text-sm text-slate-500">建議改寫</p>
+                          <p className="text-sm text-slate-500">自然改寫</p>
                           <p className="mt-1 leading-7 text-emerald-200">
                             {latestSubmission.suggested_revision}
                           </p>
@@ -403,7 +403,7 @@ export default async function OutputPage() {
 
                       {latestSubmission.collocation_feedback && (
                         <div className="mt-4">
-                          <p className="text-sm text-slate-500">搭配詞回饋</p>
+                          <p className="text-sm text-slate-500">搭配回饋</p>
                           <p className="mt-1 leading-7 text-slate-300">
                             {latestSubmission.collocation_feedback}
                           </p>
@@ -440,14 +440,14 @@ export default async function OutputPage() {
             href="/dashboard"
             className="text-sm text-slate-400 hover:text-white"
           >
-            ← 回 Dashboard
+            ← 回概覽
           </Link>
 
           <Link
             href="/review"
             className="text-sm text-slate-400 hover:text-white"
           >
-            前往每日複習
+            前往間隔複習
           </Link>
         </div>
       </div>

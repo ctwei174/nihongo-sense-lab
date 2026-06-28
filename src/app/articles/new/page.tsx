@@ -64,16 +64,16 @@ export default async function NewArticlePage() {
 
         <header className="mb-8">
           <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
-          <h1 className="mt-2 text-3xl font-bold">新增日文文章</h1>
+          <h1 className="mt-2 text-3xl font-bold">匯入日文文章</h1>
           <p className="mt-3 text-slate-400">
-            先把文章存進資料庫。下一步會加入 AI 分析 N1-N2 高階表達。
+            貼上想精讀的日文素材。儲存後可立即進入文章頁，讓 AI 拆解主旨、句構與高階表達。
           </p>
         </header>
 
         <form action={createArticle} className="space-y-5">
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-300">
-              文章標題
+              標題
             </label>
             <input
               name="title"
@@ -85,7 +85,7 @@ export default async function NewArticlePage() {
 
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-300">
-              主題，可選
+              主題標籤，可選
             </label>
             <input
               name="topic"
@@ -96,7 +96,7 @@ export default async function NewArticlePage() {
 
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-300">
-              來源 URL，可選
+              來源網址，可選
             </label>
             <input
               name="source_url"
@@ -107,7 +107,7 @@ export default async function NewArticlePage() {
 
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-300">
-              文章內容
+              日文內容
             </label>
             <textarea
               name="content"
@@ -123,14 +123,14 @@ export default async function NewArticlePage() {
               href="/articles"
               className="text-sm text-slate-400 hover:text-white"
             >
-              ← 文章庫へ戻る
+              ← 回文章庫
             </Link>
 
             <button
               type="submit"
               className="rounded-xl bg-white px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
             >
-              儲存文章
+              儲存並進入精讀
             </button>
           </div>
         </form>

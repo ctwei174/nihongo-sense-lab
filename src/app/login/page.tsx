@@ -21,11 +21,11 @@ export default async function LoginPage() {
           </p>
 
           <h1 className="mt-2 text-3xl font-bold tracking-tight">
-            高階日文學習系統
+            N1 精讀與輸出訓練室
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-[#59667a]">
-            專為 N1-N2 學習者設計，將文章輸入轉換成可複習、可輸出、可吸收的學習素材。
+            專為高階學習者設計，把日文文章轉成主旨理解、語彙筆記、間隔複習與造句批改。
           </p>
         </div>
 
