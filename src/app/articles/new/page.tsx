@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AppNav from "@/components/AppNav";
 import MaterialFileInput from "@/components/MaterialFileInput";
+import UrlImportInput from "@/components/UrlImportInput";
 import { createClient } from "@/lib/supabase/server";
 
 type NewArticlePageProps = {
@@ -16,8 +17,6 @@ const excelFileExtensions = [".xls", ".xlsx", ".csv"];
 const pdfFileExtensions = [".pdf"];
 const powerPointFileExtensions = [".pptx"];
 const maxUploadSizeBytes = 8 * 1024 * 1024;
-const maxFetchedUrlBytes = 4 * 1024 * 1024;
-const fetchTimeoutMs = 10000;
 
 function getFileExtension(fileName: string) {
   const dotIndex = fileName.lastIndexOf(".");
@@ -37,18 +36,6 @@ function getTitleFromFileName(fileName: string) {
   }
 
   return fileName.slice(0, dotIndex);
-}
-
-function getFileNameFromUrl(url: string) {
-  try {
-    const parsedUrl = new URL(url);
-    const pathname = decodeURIComponent(parsedUrl.pathname);
-    const lastSegment = pathname.split("/").filter(Boolean).at(-1);
-
-    return lastSegment || parsedUrl.hostname;
-  } catch {
-    return url;
-  }
 }
 
 function formatImportedContent(materialType: string, rawContent: string) {
@@ -72,6 +59,19 @@ function formatImportedContent(materialType: string, rawContent: string) {
   }
 }
 
+function getDefaultTitle(materialType: string) {
+  const date = new Date().toLocaleDateString("zh-TW");
+
+  switch (materialType) {
+    case "vocab":
+      return `語彙筆記 ${date}`;
+    case "sentences":
+      return `文句筆記 ${date}`;
+    default:
+      return `精讀素材 ${date}`;
+  }
+}
+
 function normalizeExtractedText(text: string) {
   return text
     .replace(/\r\n/g, "\n")
@@ -90,45 +90,6 @@ function decodeXmlText(text: string) {
 
 function stripXmlTags(text: string) {
   return decodeXmlText(text.replace(/<[^>]+>/g, " "));
-}
-
-function decodeHtmlText(text: string) {
-  return decodeXmlText(text)
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#(\d+);/g, (_, codePoint: string) =>
-      String.fromCodePoint(Number(codePoint)),
-    )
-    .replace(/&#x([0-9a-f]+);/gi, (_, codePoint: string) =>
-      String.fromCodePoint(Number.parseInt(codePoint, 16)),
-    );
-}
-
-function extractHtmlTitle(html: string) {
-  const title =
-    html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ??
-    html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] ??
-    "";
-
-  return normalizeExtractedText(stripXmlTags(title));
-}
-
-function extractReadableHtmlText(html: string) {
-  const body = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] ?? html;
-  const readable = body
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
-    .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
-    .replace(/<(header|footer|nav|aside|form)[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<(br|p|div|section|article|li|tr|h[1-6])[^>]*>/gi, "\n")
-    .replace(/<\/(p|div|section|article|li|tr|h[1-6])>/gi, "\n");
-
-  const lines = stripXmlTags(readable)
-    .split("\n")
-    .map((line) => normalizeExtractedText(decodeHtmlText(line)))
-    .filter((line) => line.length >= 2);
-
-  return lines.join("\n");
 }
 
 async function readWordUpload(file: File) {
@@ -209,103 +170,6 @@ async function readPowerPointBuffer(buffer: Buffer) {
   return slides.join("\n\n");
 }
 
-async function parseBufferByExtension(buffer: Buffer, extension: string) {
-  if (plainTextFileExtensions.includes(extension)) {
-    return buffer.toString("utf8");
-  }
-
-  if (wordFileExtensions.includes(extension)) {
-    return readWordBuffer(buffer);
-  }
-
-  if (excelFileExtensions.includes(extension)) {
-    return readExcelBuffer(buffer);
-  }
-
-  if (pdfFileExtensions.includes(extension)) {
-    return readPdfBuffer(buffer);
-  }
-
-  if (powerPointFileExtensions.includes(extension)) {
-    return readPowerPointBuffer(buffer);
-  }
-
-  return "";
-}
-
-async function fetchUrlMaterial(sourceUrl: string) {
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(sourceUrl);
-  } catch {
-    throw new Error("網址格式不正確，請確認是完整的 https:// 或 http:// 連結。");
-  }
-
-  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-    throw new Error("目前只支援 http 或 https 網址。");
-  }
-
-  const response = await fetch(parsedUrl, {
-    headers: {
-      Accept:
-        "text/html,application/xhtml+xml,application/pdf,text/plain,*/*;q=0.8",
-      "User-Agent":
-        "Mozilla/5.0 (compatible; NihongoSenseLab/1.0; +https://nihongo-sense-lab.vercel.app)",
-    },
-    signal: AbortSignal.timeout(fetchTimeoutMs),
-  });
-
-  if (!response.ok) {
-    throw new Error(`無法讀取網址內容，HTTP 狀態碼：${response.status}。`);
-  }
-
-  const contentLength = Number(response.headers.get("content-length") ?? 0);
-
-  if (contentLength > maxFetchedUrlBytes) {
-    throw new Error("網址內容太大，請改用貼上重點段落或上傳檔案。");
-  }
-
-  const arrayBuffer = await response.arrayBuffer();
-
-  if (arrayBuffer.byteLength > maxFetchedUrlBytes) {
-    throw new Error("網址內容太大，請改用貼上重點段落或上傳檔案。");
-  }
-
-  const buffer = Buffer.from(arrayBuffer);
-  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-  const extension = getFileExtension(parsedUrl.pathname);
-
-  if (contentType.includes("text/html") || extension === ".html") {
-    const html = buffer.toString("utf8");
-    const title = extractHtmlTitle(html);
-    const content = extractReadableHtmlText(html);
-
-    return { title, content };
-  }
-
-  if (
-    contentType.startsWith("text/") ||
-    plainTextFileExtensions.includes(extension)
-  ) {
-    return {
-      title: getTitleFromFileName(getFileNameFromUrl(sourceUrl)),
-      content: buffer.toString("utf8"),
-    };
-  }
-
-  const parsedContent = await parseBufferByExtension(buffer, extension);
-
-  if (parsedContent) {
-    return {
-      title: getTitleFromFileName(getFileNameFromUrl(sourceUrl)),
-      content: parsedContent,
-    };
-  }
-
-  throw new Error("無法從這個網址判斷可讀取的文字內容，請改用貼上文字或上傳檔案。");
-}
-
 async function readUploadedMaterial(file: File) {
   if (!file.size) {
     return "";
@@ -352,11 +216,13 @@ async function createArticle(formData: FormData) {
   const uploadedFile = file instanceof File && file.size > 0 ? file : null;
   const pastedContent = String(formData.get("content") ?? "").trim();
   const sourceUrl = String(formData.get("source_url") ?? "").trim();
+  const fetchedUrlTitle = String(formData.get("fetched_url_title") ?? "").trim();
+  const fetchedUrlContent = String(
+    formData.get("fetched_url_content") ?? "",
+  ).trim();
   const topicInput = String(formData.get("topic") ?? "").trim();
   let title = String(formData.get("title") ?? "").trim();
   let uploadedContent = "";
-  let fetchedTitle = "";
-  let fetchedContent = "";
 
   if (uploadedFile) {
     try {
@@ -374,38 +240,29 @@ async function createArticle(formData: FormData) {
     title = getTitleFromFileName(uploadedFile.name);
   }
 
-  if (sourceUrl && !pastedContent && !uploadedContent) {
-    try {
-      const fetchedMaterial = await fetchUrlMaterial(sourceUrl);
-
-      fetchedTitle = fetchedMaterial.title;
-      fetchedContent = normalizeExtractedText(fetchedMaterial.content);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-
-      redirect(`/articles/new?import_error=${encodeURIComponent(message)}`);
-    }
+  if (!title && fetchedUrlTitle) {
+    title = fetchedUrlTitle;
   }
 
-  if (!title && fetchedTitle) {
-    title = fetchedTitle;
-  }
-
-  if (!title && sourceUrl) {
-    title = getTitleFromFileName(getFileNameFromUrl(sourceUrl));
-  }
-
-  const rawContent = [pastedContent, uploadedContent, fetchedContent]
+  const rawContent = [
+    pastedContent,
+    uploadedContent,
+    normalizeExtractedText(fetchedUrlContent),
+  ]
     .filter(Boolean)
     .join("\n\n")
     .trim();
 
-  if (!title || !rawContent) {
+  if (!rawContent) {
     redirect(
       `/articles/new?import_error=${encodeURIComponent(
-        "請至少提供一種匯入內容：貼上文字、上傳檔案，或填入可公開讀取的網址。",
+        "請至少提供一種匯入內容：貼上文字、上傳檔案，或輸入網址後按「讀取網址」。",
       )}`,
     );
+  }
+
+  if (!title) {
+    title = getDefaultTitle(materialType);
   }
 
   const content = formatImportedContent(materialType, rawContent);
@@ -472,7 +329,7 @@ export default async function NewArticlePage({
           <p className="text-sm text-slate-400">Nihongo Sense Lab</p>
           <h1 className="mt-2 text-3xl font-bold">匯入學習素材</h1>
           <p className="mt-3 text-slate-400">
-            標題與主題可不填；貼上內容、上傳檔案、填入網址三擇一即可。儲存後進入精讀頁，讓 AI 拆解主旨、句構與高階表達。
+            標題與主題可不填；貼上內容、上傳檔案、或輸入網址後按「讀取網址」三擇一即可。儲存後進入精讀頁，讓 AI 拆解主旨、句構與高階表達。
           </p>
         </header>
 
@@ -552,19 +409,7 @@ export default async function NewArticlePage({
             />
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300">
-              網址匯入，可選
-            </label>
-            <input
-              name="source_url"
-              placeholder="https://..."
-              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-slate-400"
-            />
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              只填網址也可以。系統會讀取公開頁面文字；需要登入或反爬限制的網站可能無法讀取。
-            </p>
-          </div>
+          <UrlImportInput />
 
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-300">
