@@ -4,6 +4,7 @@ import AppNav from "@/components/AppNav";
 import GenerateArticleButton from "@/components/GenerateArticleButton";
 import MaterialFileInput from "@/components/MaterialFileInput";
 import UrlImportInput from "@/components/UrlImportInput";
+import { readPdfText } from "@/lib/pdf";
 import { createClient } from "@/lib/supabase/server";
 
 type NewArticlePageProps = {
@@ -130,28 +131,8 @@ async function readPdfUpload(file: File) {
   return readPdfBuffer(buffer);
 }
 
-async function installPdfDomPolyfills() {
-  const target = globalThis as unknown as Record<string, unknown>;
-
-  if (target.DOMMatrix && target.ImageData && target.Path2D) {
-    return;
-  }
-
-  const { DOMMatrix, ImageData, Path2D } = await import("@napi-rs/canvas");
-
-  target.DOMMatrix ??= DOMMatrix;
-  target.ImageData ??= ImageData;
-  target.Path2D ??= Path2D;
-}
-
 async function readPdfBuffer(buffer: Buffer) {
-  await installPdfDomPolyfills();
-
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
-  const result = await parser.getText();
-
-  return result.text;
+  return readPdfText(buffer);
 }
 
 async function readPowerPointUpload(file: File) {

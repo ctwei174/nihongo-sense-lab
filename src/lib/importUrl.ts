@@ -1,3 +1,5 @@
+import { readPdfText } from "@/lib/pdf";
+
 const plainTextFileExtensions = [".txt", ".csv", ".md"];
 const wordFileExtensions = [".docx"];
 const excelFileExtensions = [".xls", ".xlsx", ".csv"];
@@ -283,28 +285,8 @@ async function readExcelBuffer(buffer: Buffer) {
   }).join("\n\n");
 }
 
-async function installPdfDomPolyfills() {
-  const target = globalThis as unknown as Record<string, unknown>;
-
-  if (target.DOMMatrix && target.ImageData && target.Path2D) {
-    return;
-  }
-
-  const { DOMMatrix, ImageData, Path2D } = await import("@napi-rs/canvas");
-
-  target.DOMMatrix ??= DOMMatrix;
-  target.ImageData ??= ImageData;
-  target.Path2D ??= Path2D;
-}
-
 async function readPdfBuffer(buffer: Buffer) {
-  await installPdfDomPolyfills();
-
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
-  const result = await parser.getText();
-
-  return result.text;
+  return readPdfText(buffer);
 }
 
 async function readPowerPointBuffer(buffer: Buffer) {
